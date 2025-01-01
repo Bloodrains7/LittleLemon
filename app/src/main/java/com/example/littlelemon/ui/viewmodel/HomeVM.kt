@@ -1,22 +1,24 @@
-package com.example.littlelemon.data.model
+package com.example.littlelemon.ui.viewmodel
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.littlelemon.repository.AppRepository
+import com.example.littlelemon.data.AppRepository
+import com.example.littlelemon.data.model.MenuItemLocal
+import com.example.littlelemon.data.model.util.Result
+import com.example.littlelemon.data.model.util.asResult
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
-class MenuViewModel(application: Application) : AndroidViewModel(application = application) {
-
+class HomeVM(application: Application) : AndroidViewModel(application = application) {
     private val appRepository = AppRepository.getInstance(
         application.applicationContext
     )
 
-    private val _menuData = MutableStateFlow<Result<List<MenuItemEntity>>>(Result.Loading)
-    val menuData: StateFlow<Result<List<MenuItemEntity>>> = _menuData
+    private val _menuData = MutableStateFlow<Result<List<MenuItemLocal>>>(Result.Loading)
+    val menuData: StateFlow<Result<List<MenuItemLocal>>> = _menuData
 
     init {
         fetchData()
@@ -24,9 +26,9 @@ class MenuViewModel(application: Application) : AndroidViewModel(application = a
 
     fun fetchData() {
         appRepository.getMenuData()
-        appRepository.getMenuData()
             .asResult()
             .onEach { _menuData.value = it }
             .launchIn(viewModelScope)
     }
+
 }

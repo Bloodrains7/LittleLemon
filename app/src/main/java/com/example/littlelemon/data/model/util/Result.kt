@@ -1,4 +1,4 @@
-package com.example.littlelemon.data.model
+package com.example.littlelemon.data.model.util
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch

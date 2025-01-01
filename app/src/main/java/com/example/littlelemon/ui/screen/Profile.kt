@@ -1,79 +1,128 @@
 package com.example.littlelemon.ui.screen
 
-import android.content.Context
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.example.littlelemon.R
-import com.example.littlelemon.ui.navigation.Onboarding
+import com.example.littlelemon.data.model.User
+import com.example.littlelemon.ui.navigation.Destinations
+import com.example.littlelemon.ui.theme.app.AppTheme
+import com.example.littlelemon.ui.viewmodel.ProfileVM
 
 @Composable
-fun Profile(navController: NavHostController, context: Context) {
-    val sharedPreferences = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+fun ProfileScreen(navController: NavController, profileVm: ProfileVM = viewModel()) {
+    val user by profileVm.user.collectAsStateWithLifecycle()
+    ProfileUI(user = user) {
+        profileVm.logOut()
+        navController.popBackStack(Destinations.Home.getRoute(), true)
+        navController.navigate(Destinations.OnBoard.getRoute())
+    }
+}
 
-    val firstName = remember { sharedPreferences.getString("first_name", "") ?: "" }
-    val lastName = remember { sharedPreferences.getString("last_name", "") ?: "" }
-    val email = remember { sharedPreferences.getString("email", "") ?: "" }
-
+@Composable
+fun ProfileUI(user: User?, logOut: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .padding(16.dp, 0.dp)
+            .verticalScroll(rememberScrollState())
     ) {
-        // Header with logo
         Image(
             painter = painterResource(id = R.drawable.logo),
-            contentDescription = "App Logo",
-            modifier = Modifier.size(100.dp).padding(bottom = 16.dp)
+            contentDescription = "little lemon logo",
+            modifier = Modifier
+                .padding(vertical = 16.dp, horizontal = 32.dp)
+                .align(Alignment.CenterHorizontally)
+                .height(80.dp)
+                .fillMaxWidth()
+        )
+        Text(
+            text = stringResource(R.string.user_profile_title),
+            modifier = Modifier
+                .padding(0.dp, 40.dp),
+            style = AppTheme.typography.subTitle
         )
 
-        // Profile Information Header
-        Text(text = "Profile information:", modifier = Modifier.padding(bottom = 16.dp))
+        UserInfoLabel(label = stringResource(R.string.user_profile_first_name_label))
+        UserInfoText(info = user?.firstName ?: "")
 
-        // Display user information
-        Text(text = "First Name: $firstName", modifier = Modifier.padding(bottom = 8.dp))
-        Text(text = "Last Name: $lastName", modifier = Modifier.padding(bottom = 8.dp))
-        Text(text = "Email Address: $email", modifier = Modifier.padding(bottom = 16.dp))
+        Spacer(modifier = Modifier.height(32.dp))
 
-        // Log out button
+        UserInfoLabel(label = stringResource(R.string.user_profile_last_name_label))
+        UserInfoText(info = user?.lastName ?: "")
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        UserInfoLabel(label = stringResource(R.string.user_profile_email_label))
+        UserInfoText(info = user?.email ?: "")
+
+        Spacer(modifier = Modifier.height(32.dp))
+
         Button(
-            onClick = {
-                with(sharedPreferences.edit()) {
-                    clear()
-                    apply()
-                }
-                navController.navigate(Onboarding.route) {
-                    popUpTo(0)
-                }
-            },
-            modifier = Modifier.fillMaxWidth()
+            onClick = { logOut() },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(0.dp, 16.dp),
+            colors = ButtonDefaults.filledTonalButtonColors(containerColor = AppTheme.color.primary2),
+            shape = MaterialTheme.shapes.medium
         ) {
-            Text("Log out")
+            Text(text = stringResource(R.string.user_profile_log_out_btn_txt))
         }
     }
 }
 
-@Preview(showBackground = true)
 @Composable
-fun ProfilePreview() {
-    Profile(
-        navController = rememberNavController(),
-        context = LocalContext.current
+@Preview(showBackground = true)
+fun ProfileScreenPreview() {
+    ProfileUI(
+        User("John", "Muller", "muller@example.com")
+    ) {}
+}
+
+@Composable
+fun UserInfoLabel(
+    label: String
+) {
+    Text(
+        text = label,
+        style = AppTheme.typography.sectionTitle,
+        color = AppTheme.color.primary1
+    )
+}
+
+@Composable
+fun UserInfoText(
+    info: String
+) {
+    Text(
+        text = info,
+        style = AppTheme.typography.leadText,
+        modifier = Modifier
+            .padding(0.dp, 8.dp)
+            .fillMaxWidth()
+            .border(1.dp, AppTheme.color.primary1, shape = MaterialTheme.shapes.medium)
+            .padding(16.dp)
     )
 }

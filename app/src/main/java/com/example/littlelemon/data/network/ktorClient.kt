@@ -1,4 +1,4 @@
-package com.example.littlelemon.client
+package com.example.littlelemon.data.network
 
 import android.util.Log
 import io.ktor.client.HttpClient

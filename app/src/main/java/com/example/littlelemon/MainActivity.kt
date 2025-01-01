@@ -3,30 +3,51 @@ package com.example.littlelemon
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import com.example.littlelemon.data.model.MenuItemEntity
-import com.example.littlelemon.data.model.MenuItemNetwork
-import com.example.littlelemon.ui.navigation.NavigationComposable
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.rememberNavController
+import com.example.littlelemon.data.PreferenceRepository
+import com.example.littlelemon.ui.navigation.Navigation
+import com.example.littlelemon.ui.theme.app.AppTheme
 
 class MainActivity : ComponentActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        val preferenceRepository =
+            PreferenceRepository.getPreferenceRepository(this.applicationContext)
         setContent {
-            NavigationComposable()
+            AppTheme {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    val navHostController = rememberNavController()
+                    Navigation(navHostController = navHostController, preferenceRepository)
+                }
+            }
         }
     }
 }
 
-private fun mapNetworkToEntity(networkItems: List<MenuItemNetwork>): List<MenuItemEntity> {
-    return networkItems.map {
-        MenuItemEntity(
-            id = it.id,
-            title = it.title,
-            description = it.description,
-            price = it.price,
-            image = it.image,
-            category = it.category
-        )
+
+@Preview(showBackground = true)
+@Composable
+fun GreetingPreview() {
+    AppTheme {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            val navHostController = rememberNavController()
+            Navigation(
+                navHostController = navHostController,
+                PreferenceRepository.getPreferenceRepository(LocalContext.current)
+            )
+        }
     }
 }

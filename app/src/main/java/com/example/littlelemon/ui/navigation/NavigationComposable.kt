@@ -1,24 +1,32 @@
 package com.example.littlelemon.ui.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import com.example.littlelemon.ui.screen.Home;
-import com.example.littlelemon.ui.screen.Profile;
-import OnBoarding;
+import com.example.littlelemon.data.PreferenceRepository
+import com.example.littlelemon.ui.screen.HomeScreen
+import com.example.littlelemon.ui.screen.OnBoarding
+import com.example.littlelemon.ui.screen.ProfileScreen
 
 @Composable
-fun NavigationComposable() {
-    val navController = rememberNavController()
-
+fun Navigation(navHostController: NavHostController, preferenceRepository: PreferenceRepository) {
     NavHost(
-        navController = navController,
-        startDestination = Profile.route
+        navController = navHostController,
+        startDestination =
+        if (preferenceRepository.isUserLoggedIn())
+            Destinations.Home.getRoute()
+        else
+            Destinations.OnBoard.getRoute()
     ) {
-        composable(Onboarding.route) { OnBoarding(navController = navController, context = LocalContext.current) }
-        composable(Home.route) { Home(navController = navController) }
-        composable(Profile.route) { Profile(navController = navController, context = LocalContext.current) }
+        composable(route = Destinations.OnBoard.getRoute()) {
+            OnBoarding(navHostController, preferenceRepository)
+        }
+        composable(route = Destinations.Home.getRoute()) {
+            HomeScreen(navHostController)
+        }
+        composable(route = Destinations.Profile.getRoute()) {
+            ProfileScreen(navHostController)
+        }
     }
 }
