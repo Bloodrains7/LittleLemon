@@ -8,8 +8,10 @@ import com.example.littlelemon.data.model.MenuItemNetwork
 import com.example.littlelemon.ui.navigation.NavigationComposable
 
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContent {
             NavigationComposable()
         }
@@ -23,7 +25,8 @@ private fun mapNetworkToEntity(networkItems: List<MenuItemNetwork>): List<MenuIt
             title = it.title,
             description = it.description,
             price = it.price,
-            image = it.image
+            image = it.image,
+            category = it.category
         )
     }
 }

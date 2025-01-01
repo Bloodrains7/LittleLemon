@@ -1,5 +1,6 @@
 package com.example.littlelemon.data.model
 
+import android.view.MenuItem
 import androidx.room.Dao
 import androidx.room.Database
 import androidx.room.Entity
@@ -16,7 +17,8 @@ data class MenuItemEntity(
     val title: String,
     val description: String,
     val price: Double,
-    val image: String
+    val image: String,
+    val category: String
 )
 
 @Dao

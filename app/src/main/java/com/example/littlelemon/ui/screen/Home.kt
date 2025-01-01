@@ -14,6 +14,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -21,8 +22,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -37,15 +40,39 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import coil.compose.rememberAsyncImagePainter
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.example.littlelemon.data.model.MenuItemEntity
+import com.example.littlelemon.data.model.MenuViewModel
 import com.example.littlelemon.ui.theme.app.AppTheme
 
 @Composable
-fun Home() {
-    Text("Welcome to the Home Screen!")
+fun Home(navController: NavController, viewModel: MenuViewModel = viewModel()) {
+    var searchPhrase by remember { mutableStateOf("") }
+    var selectedCategory by remember { mutableStateOf<String?>(null) }
+
+    val menuItems by viewModel.menuData.collectAsState()
+
+    // Search
+    val filteredItems = menuItems.filter { item ->
+        (selectedCategory == null || item.category == selectedCategory) &&
+                (item.title.contains(searchPhrase, ignoreCase = true) ||
+                        item.description.contains(searchPhrase, ignoreCase = true))
+    }
+
+    Column {
+        HeroSection(onSearch = { query -> searchPhrase = query })
+        MenuBreakdown(menuItems = menuItems) { category ->
+            selectedCategory = category
+        }
+        FilteredMenuItems(
+            menuItems = menuItems,
+            selectedCategory = selectedCategory,
+            searchPhrase = searchPhrase
+        )
+    }
 }
 
 @Preview(showBackground = true)
@@ -214,4 +241,53 @@ fun MenuItem(item: MenuItemEntity) {
         )
     }
 }
+
+@Composable
+fun MenuBreakdown(
+    menuItems: List<MenuItemEntity>,
+    onCategorySelected: (String) -> Unit
+) {
+    // Group items by category
+    val categories = menuItems
+        .groupBy { it.category }
+        .keys
+        .toList()
+
+    // Display category buttons
+    Column(
+        modifier = Modifier.padding(16.dp)
+    ) {
+        categories.forEach { category ->
+            Button(
+                onClick = {
+                    onCategorySelected(category) // Filter items based on category
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp)
+            ) {
+                Text(text = category)
+            }
+        }
+    }
+}
+
+@Composable
+fun FilteredMenuItems(
+    menuItems: List<MenuItemEntity>,
+    selectedCategory: String?,
+    searchPhrase: String
+) {
+    // Filter items by category and search phrase
+    val filteredItems = menuItems.filter { item ->
+        (selectedCategory == null || item.category == selectedCategory) &&
+                (item.title.contains(searchPhrase, ignoreCase = true) ||
+                        item.description.contains(searchPhrase, ignoreCase = true))
+    }
+
+    // Display filtered items
+    MenuItems(menuItems = filteredItems)
+}
+
+
 

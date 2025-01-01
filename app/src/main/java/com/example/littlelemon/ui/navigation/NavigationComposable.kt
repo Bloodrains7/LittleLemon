@@ -18,7 +18,7 @@ fun NavigationComposable() {
         startDestination = Profile.route
     ) {
         composable(Onboarding.route) { OnBoarding(navController = navController, context = LocalContext.current) }
-        composable(Home.route) { Home() }
+        composable(Home.route) { Home(navController = navController) }
         composable(Profile.route) { Profile(navController = navController, context = LocalContext.current) }
     }
 }
